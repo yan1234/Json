@@ -70,31 +70,13 @@ public class JsonTool {
 					else if (isListType(value)){
 						//将结果对象转化为List对象
 						List list = (List) value;
-						//获取该列表的迭代器
-						Iterator iterator = list.iterator();
-						
-						//得到list集合对象的子元素，并验证list是否为空的情况
-						if (iterator.hasNext()){
-							//获取子元素
-							Object firstChild = iterator.next();
-							//判断该子元素类型是否是基本数据或String类型
-							if (isBasicType(firstChild)){
-								//将该子元素以累加的形式添加到json中
-								try {
-									json.accumulate(fieldName, firstChild);
-									//遍历剩下的子元素并以累加的形式添加到json中
-									while (iterator.hasNext()){
-										Object child = iterator.next();
-										json.accumulate(fieldName, child);
-									}
-								} catch (JSONException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								
-							}						
+						try {
+							//调用listToJson方法将list集合对象转化为JSONArray对象
+							json.put(fieldName, listToJson(list));
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						
 					}
 					//非基本数据类型
 					else {
@@ -124,9 +106,35 @@ public class JsonTool {
 	 * @return JSONArray
 	 * @throws
 	 */
-	public static JSONArray listToJson(List<Object> list){
+	public static JSONArray listToJson(List list){
 		
 		JSONArray array = new JSONArray();
+		//获取该列表的迭代器
+		Iterator iterator = list.iterator();
+		
+		//得到list集合对象的子元素，并验证list是否为空的情况
+		if (iterator.hasNext()){
+			//获取子元素
+			Object firstChild = iterator.next();
+			//判断该子元素类型是否是基本数据或String类型
+			if (isBasicType(firstChild)){
+				array.put(firstChild);
+				//遍历剩下的子元素并以累加的形式添加到json中
+				while (iterator.hasNext()){
+					Object child = iterator.next();
+					array.put(child);
+				}
+				
+			}//表示该对象是引用数据类型
+			else {
+				array.put(objToJson(firstChild));
+				//遍历剩下的子元素并以累加的形式添加到json中
+				while (iterator.hasNext()){
+					Object child = iterator.next();
+					array.put(objToJson(child));
+				}
+			}
+		}
 		
 		return array;
 	}
